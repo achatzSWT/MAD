@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">FA-ToDo</string>
+    <string name="todo_list_empty">Noch keine ToDos vorhanden</string>
+</resources>
