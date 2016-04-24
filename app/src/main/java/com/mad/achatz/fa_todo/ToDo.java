@@ -1,20 +1,18 @@
 package com.mad.achatz.fa_todo;
 
-import java.util.Date;
+import java.util.Calendar;
 
-/**
- * Created by C-Master on 17.04.2016.
- */
+
 public class ToDo {
 
     private String name;
     private String description;
     private boolean isDone = false;
     private boolean isFavourite = false;
-    private Date dueDate;
+    private Calendar dueDate;
 
     public ToDo(){
-
+        dueDate = Calendar.getInstance();
     }
 
     public String getName() {
@@ -49,11 +47,11 @@ public class ToDo {
         isFavourite = favourite;
     }
 
-    public Date getDueDate() {
+    public Calendar getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(Calendar dueDate) {
         this.dueDate = dueDate;
     }
 }
