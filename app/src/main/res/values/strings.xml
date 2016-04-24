@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">FA-ToDo</string>
     <string name="todo_list_empty">Noch keine ToDos vorhanden</string>
+    <string name="hint_name">Bezeichnung</string>
+    <string name="hint_description">Beschreibung</string>
+    <string name="date">Datum</string>
+    <string name="time">Uhrzeit</string>
+    <string name="due_label">Fälligkeit</string>
+    <string name="done">Erledigt</string>
 </resources>
