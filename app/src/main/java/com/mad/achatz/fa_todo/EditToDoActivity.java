@@ -3,7 +3,9 @@ package com.mad.achatz.fa_todo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -17,6 +19,7 @@ public class EditToDoActivity extends AppCompatActivity
 
     private ToDo todo;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,16 +27,32 @@ public class EditToDoActivity extends AppCompatActivity
 
         todo = new ToDo();
 
+        ((EditText)findViewById(R.id.todo_name_edittext)).setText(todo.getName());
+        ((EditText)findViewById(R.id.todo_description_edittext)).setText(todo.getDescription());
         setDateTimeTextViews(todo.getDueDate().getTime());
+        ((CheckBox)findViewById(R.id.done_checkbox)).setChecked(todo.isDone());
+        ((CheckBox)findViewById(R.id.favorite_checkbox)).setChecked(todo.isFavourite());
     }
 
     public void dateTimeClicked(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.date_textview:
                 showDatePickerDialog();
                 break;
             case R.id.time_textview:
                 showTimePickerDialog();
+                break;
+        }
+    }
+
+    public void checkboxClicked(View view) {
+        CheckBox cb = (CheckBox) view;
+        switch (view.getId()) {
+            case R.id.done_checkbox:
+                todo.setDone(cb.isChecked());
+                break;
+            case R.id.favorite_checkbox:
+                todo.setFavourite(cb.isChecked());
                 break;
         }
     }

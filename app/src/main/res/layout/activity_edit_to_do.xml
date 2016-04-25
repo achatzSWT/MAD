@@ -23,6 +23,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="16dp"
+            android:maxLines="1"
+            android:inputType="text"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:hint="@string/hint_name"/>
 
@@ -32,14 +34,16 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:button="@drawable/ic_check_circle_black_24dp"
-            android:buttonTint="@color/checkmark_checkbox_colors" />
+            android:buttonTint="@color/checkmark_checkbox_colors"
+            android:onClick="checkboxClicked"/>
 
         <CheckBox
             android:id="@+id/favorite_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:button="@drawable/ic_grade_black_24dp"
-            android:buttonTint="@color/star_checkbox_colors" />
+            android:buttonTint="@color/star_checkbox_colors"
+            android:onClick="checkboxClicked"/>
 
     </LinearLayout>
 
@@ -69,7 +73,6 @@
             android:hint="@string/hint_description" />
 
     </LinearLayout>
-
 
 
     <LinearLayout
