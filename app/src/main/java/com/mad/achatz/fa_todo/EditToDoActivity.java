@@ -1,7 +1,11 @@
 package com.mad.achatz.fa_todo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -17,6 +21,8 @@ public class EditToDoActivity extends AppCompatActivity
                               implements DatepickerDialogFragment.OnDateSetListener,
                                          TimepickerDialogFragment.OnTimeSetListener {
 
+    public static final String EXTRA_TODO_PARCEL = "EXTRA_TODO_PARCEL";
+
     private ToDo todo;
 
 
@@ -24,6 +30,7 @@ public class EditToDoActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_to_do);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         todo = new ToDo();
 
@@ -32,6 +39,27 @@ public class EditToDoActivity extends AppCompatActivity
         setDateTimeTextViews(todo.getDueDate().getTime());
         ((CheckBox)findViewById(R.id.done_checkbox)).setChecked(todo.isDone());
         ((CheckBox)findViewById(R.id.favorite_checkbox)).setChecked(todo.isFavourite());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.edit_todo_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_save:
+                returnTodo();
+                return true;
+            case android.R.id.home:
+                setResult(RESULT_CANCELED);
+                finish();
+        }
+
+        return false;
     }
 
     public void dateTimeClicked(View view) {
@@ -128,4 +156,17 @@ public class EditToDoActivity extends AppCompatActivity
         timeTextView.setText(timeString);
     }
 
+
+    private void returnTodo() {
+        // Andere Werte werden alle in "Echtzeit" gesetzt, aber Name und Beschreibung fehlen noch
+        EditText nameEditText = (EditText) findViewById(R.id.todo_name_edittext);
+        EditText descEditText = (EditText) findViewById(R.id.todo_description_edittext);
+        todo.setName(nameEditText.getText().toString());
+        todo.setDescription(descEditText.getText().toString());
+
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_TODO_PARCEL, todo);
+        this.setResult(RESULT_OK, intent);
+        finish();
+    }
 }

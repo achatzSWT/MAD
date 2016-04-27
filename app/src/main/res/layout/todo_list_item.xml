@@ -8,8 +8,13 @@
     android:gravity="center_vertical">
 
     <CheckBox
+        android:id="@+id/list_item_done_checkbox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:button="@drawable/ic_check_circle_black_24dp"
+        android:buttonTint="@color/checkmark_checkbox_colors"
+        android:onClick="listItemCheckboxClicked"/>
 
     <LinearLayout
         android:orientation="vertical"
@@ -18,18 +23,23 @@
         android:layout_weight="1">
 
         <TextView
+            android:id="@+id/list_item_name_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
+            android:id="@+id/list_item_date_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     </LinearLayout>
 
-    <ImageView
+    <CheckBox
+        android:id="@+id/list_item_favorite_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_grade_black_24dp"/>
+        android:button="@drawable/ic_grade_black_24dp"
+        android:buttonTint="@color/star_checkbox_colors"
+        android:onClick="listItemCheckboxClicked"/>
 
 </LinearLayout>

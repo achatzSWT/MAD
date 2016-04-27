@@ -1,10 +1,14 @@
 package com.mad.achatz.fa_todo;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Calendar;
 
 
-public class ToDo {
+public class ToDo implements Parcelable {
 
+    private long dbID;
     private String name;
     private String description;
     private boolean isDone = false;
@@ -13,6 +17,14 @@ public class ToDo {
 
     public ToDo(){
         dueDate = Calendar.getInstance();
+    }
+
+    public long getDbId() {
+        return dbID;
+    }
+
+    public void setDbId(long id) {
+        dbID = id;
     }
 
     public String getName() {
@@ -54,4 +66,41 @@ public class ToDo {
     public void setDueDate(Calendar dueDate) {
         this.dueDate = dueDate;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(description);
+        boolean[] boolValues = new boolean[]{isDone, isFavourite};
+        dest.writeBooleanArray(boolValues);
+        dest.writeSerializable(dueDate);
+    }
+
+    private static ToDo createTodoFromParcel(Parcel parcel) {
+        ToDo todo =  new ToDo();
+        todo.setName(parcel.readString());
+        todo.setDescription(parcel.readString());
+        boolean[] boolvalues = new boolean[2];
+        parcel.readBooleanArray(boolvalues);
+        todo.setDone(boolvalues[0]);
+        todo.setFavourite(boolvalues[1]);
+        todo.setDueDate((Calendar)parcel.readSerializable());
+        return todo;
+    }
+
+    public static final Parcelable.Creator CREATOR =
+        new Parcelable.Creator() {
+            public ToDo createFromParcel(Parcel in) {
+                return ToDo.createTodoFromParcel(in);
+            }
+
+            public ToDo[] newArray(int size) {
+                return new ToDo[size];
+            }
+        };
 }

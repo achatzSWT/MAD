@@ -7,4 +7,5 @@
     <string name="time">Uhrzeit</string>
     <string name="due_label">Fälligkeit</string>
     <string name="done">Erledigt</string>
+    <string name="save">Speichern</string>
 </resources>
