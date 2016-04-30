@@ -92,7 +92,7 @@ public class TodoDbAdapter {
     	updateValues.put(COLUMN_DESCRIPTION, todo.getDescription());
         updateValues.put(COLUMN_DONE, todo.isDone());
         updateValues.put(COLUMN_FAVORITE, todo.isFavourite());
-		SimpleDateFormat dateFormat = new SimpleDateFormat("y-M-d H:m:s");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String datetimeString = dateFormat.format(todo.getDueDate().getTime());
 		updateValues.put(COLUMN_DUEDATE, datetimeString);
         int result = db.update(TABLE_TODOS, updateValues, COLUMN_ID+"="+todo.getDbId(), null);

@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">FA-ToDo</string>
+    <string name="label_add_todo">ToDo hinzufügen</string>
+    <string name="label_edit_todo">ToDo bearbeiten</string>
     <string name="todo_list_empty">Noch keine ToDos vorhanden</string>
     <string name="hint_name">Bezeichnung</string>
     <string name="hint_description">Beschreibung</string>
@@ -8,4 +10,9 @@
     <string name="due_label">Fälligkeit</string>
     <string name="done">Erledigt</string>
     <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="dialog_delete_todo_title">ToDo Löschen</string>
+    <string name="dialog_delete_todo_description">Sind Sie sicher, dass Sie das ToDo wirklich löschen wollen?</string>
 </resources>

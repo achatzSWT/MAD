@@ -14,17 +14,21 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class EditToDoActivity extends AppCompatActivity
                               implements DatepickerDialogFragment.OnDateSetListener,
-                                         TimepickerDialogFragment.OnTimeSetListener {
+                                         TimepickerDialogFragment.OnTimeSetListener,
+                                         DeleteToDoDialogFragment.OnDeleteComfirmedListener {
 
     public static final String EXTRA_TODO_PARCEL = "EXTRA_TODO_PARCEL";
+    public static final int RESULT_DELETE = 123;
 
     private ToDo todo;
 
+    private boolean inEditMode = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +36,15 @@ public class EditToDoActivity extends AppCompatActivity
         setContentView(R.layout.activity_edit_to_do);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        todo = new ToDo();
+        setTitle(R.string.label_edit_todo);
+
+        todo = getIntent().getParcelableExtra(EXTRA_TODO_PARCEL);
+
+        if (todo == null) {
+            todo = new ToDo();
+            setTitle(R.string.label_add_todo);
+            inEditMode = false;
+        }
 
         ((EditText)findViewById(R.id.todo_name_edittext)).setText(todo.getName());
         ((EditText)findViewById(R.id.todo_description_edittext)).setText(todo.getDescription());
@@ -45,6 +57,7 @@ public class EditToDoActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.edit_todo_menu, menu);
+        menu.findItem(R.id.menu_delete).setVisible(inEditMode);
         return true;
     }
 
@@ -53,6 +66,9 @@ public class EditToDoActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.menu_save:
                 returnTodo();
+                return true;
+            case R.id.menu_delete:
+                showDeleteConfirmDialog();
                 return true;
             case android.R.id.home:
                 setResult(RESULT_CANCELED);
@@ -131,6 +147,10 @@ public class EditToDoActivity extends AppCompatActivity
         timepickerDialogFragment.show(getFragmentManager(), null);
     }
 
+    private void showDeleteConfirmDialog() {
+        DeleteToDoDialogFragment deleteToDoDialogFragment = new DeleteToDoDialogFragment();
+        deleteToDoDialogFragment.show(getFragmentManager(), null);
+    }
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -149,7 +169,7 @@ public class EditToDoActivity extends AppCompatActivity
 
     private void setDateTimeTextViews(Date date) {
         String dateString = DateFormat.getDateInstance(DateFormat.FULL).format(date);
-        String timeString = DateFormat.getTimeInstance(DateFormat.SHORT).format(date);
+        String timeString = (new SimpleDateFormat("HH:mm")).format(date);
         TextView dateTextView = (TextView) findViewById(R.id.date_textview);
         TextView timeTextView = (TextView) findViewById(R.id.time_textview);
         dateTextView.setText(dateString);
@@ -169,4 +189,13 @@ public class EditToDoActivity extends AppCompatActivity
         this.setResult(RESULT_OK, intent);
         finish();
     }
+
+    @Override
+    public void onDeleteConfirmed() {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_TODO_PARCEL, todo);
+        this.setResult(RESULT_DELETE, intent);
+        finish();
+    }
+
 }

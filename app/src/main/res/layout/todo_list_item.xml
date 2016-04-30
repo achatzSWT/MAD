@@ -13,8 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:button="@drawable/ic_check_circle_black_24dp"
-        android:buttonTint="@color/checkmark_checkbox_colors"
-        android:onClick="listItemCheckboxClicked"/>
+        android:buttonTint="@color/checkmark_checkbox_colors" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -39,7 +38,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:button="@drawable/ic_grade_black_24dp"
-        android:buttonTint="@color/star_checkbox_colors"
-        android:onClick="listItemCheckboxClicked"/>
+        android:buttonTint="@color/star_checkbox_colors" />
 
 </LinearLayout>

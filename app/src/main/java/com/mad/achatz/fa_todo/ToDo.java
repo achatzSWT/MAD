@@ -74,6 +74,7 @@ public class ToDo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(dbID);
         dest.writeString(name);
         dest.writeString(description);
         boolean[] boolValues = new boolean[]{isDone, isFavourite};
@@ -83,6 +84,7 @@ public class ToDo implements Parcelable {
 
     private static ToDo createTodoFromParcel(Parcel parcel) {
         ToDo todo =  new ToDo();
+        todo.setDbId(parcel.readLong());
         todo.setName(parcel.readString());
         todo.setDescription(parcel.readString());
         boolean[] boolvalues = new boolean[2];

@@ -10,18 +10,25 @@ import android.widget.TextView;
 
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 
 public class TodoListAdapter extends ArrayAdapter {
 
+    private ToDoListClickListener toDoListClickListener;
+
     public TodoListAdapter(Context context, List<ToDo> objects) {
         super(context, R.layout.todo_list_item, objects);
     }
 
+    public void setToDoListClickListener(ToDoListClickListener toDoListClickListener) {
+        this.toDoListClickListener = toDoListClickListener;
+    }
+
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ToDo todo = (ToDo) getItem(position);
 
         if (convertView == null) {
@@ -32,12 +39,54 @@ public class TodoListAdapter extends ArrayAdapter {
 
         Date date = todo.getDueDate().getTime();
         String dateString = DateFormat.getDateInstance().format(date);
-        dateString += ", " + DateFormat.getTimeInstance(DateFormat.SHORT).format(date);
+        dateString += ", " + (new SimpleDateFormat("HH:mm")).format(date);
         ((TextView)convertView.findViewById(R.id.list_item_date_textview)).setText(dateString);
 
-        ((CheckBox)convertView.findViewById(R.id.list_item_done_checkbox)).setChecked(todo.isDone());
-        ((CheckBox)convertView.findViewById(R.id.list_item_favorite_checkbox)).setChecked(todo.isFavourite());
+        final CheckBox doneCheckbox = (CheckBox)convertView.findViewById(R.id.list_item_done_checkbox);
+        final CheckBox favCheckbox = (CheckBox)convertView.findViewById(R.id.list_item_favorite_checkbox);
+
+        doneCheckbox.setChecked(todo.isDone());
+        favCheckbox.setChecked(todo.isFavourite());
+
+        doneCheckbox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (toDoListClickListener != null) {
+                    ToDo clickedTodo = (ToDo) getItem(position);
+                    clickedTodo.setDone(doneCheckbox.isChecked());
+                    toDoListClickListener.onDoneClicked(position);
+                }
+            }
+        });
+
+        favCheckbox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (toDoListClickListener != null) {
+                    ToDo clickedTodo = (ToDo) getItem(position);
+                    clickedTodo.setFavourite(favCheckbox.isChecked());
+                    toDoListClickListener.onFavClicked(position);
+                }
+            }
+        });
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (toDoListClickListener != null) {
+                    toDoListClickListener.onItemClicked(position);
+                }
+            }
+        });
 
         return convertView;
     }
+
+
+    public interface ToDoListClickListener {
+        void onDoneClicked(int position);
+        void onFavClicked(int position);
+        void onItemClicked(int position);
+    }
+
 }
