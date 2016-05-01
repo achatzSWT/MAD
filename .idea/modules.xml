@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/FA-ToDo.iml" filepath="$PROJECT_DIR$/FA-ToDo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Papi_ToDo.iml" filepath="$PROJECT_DIR$/Papi_ToDo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

@@ -5,8 +5,10 @@
     android:layout_height="wrap_content"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="16dp"
+    android:paddingTop="16dp"
     android:gravity="center_vertical"
-    android:background="@drawable/list_item_colors">
+    android:background="?android:attr/selectableItemBackground">
 
     <CheckBox
         android:id="@+id/list_item_done_checkbox"
@@ -20,17 +22,23 @@
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:duplicateParentState="true">
 
         <TextView
             android:id="@+id/list_item_name_textview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:duplicateParentState="true"
+            android:textSize="20sp"
+            android:textColor="@color/activated_text_colors"/>
 
         <TextView
             android:id="@+id/list_item_date_textview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/activated_text_colors"/>
 
     </LinearLayout>
 

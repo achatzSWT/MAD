@@ -35,13 +35,13 @@ public class TodoListAdapter extends ArrayAdapter {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.todo_list_item, null);
         }
 
-        convertView.setActivated(todo.isOverdue());
+        convertView.setActivated(todo.isOverdue() && !todo.isDone());
 
         ((TextView)convertView.findViewById(R.id.list_item_name_textview)).setText(todo.getName());
 
         Date date = todo.getDueDate().getTime();
         String dateString = DateFormat.getDateInstance().format(date);
-        dateString += ", " + (new SimpleDateFormat("HH:mm")).format(date);
+        dateString += ", " + (SimpleDateFormat.getTimeInstance(DateFormat.SHORT)).format(date);
         ((TextView)convertView.findViewById(R.id.list_item_date_textview)).setText(dateString);
 
         final CheckBox doneCheckbox = (CheckBox)convertView.findViewById(R.id.list_item_done_checkbox);

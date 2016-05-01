@@ -169,7 +169,7 @@ public class EditToDoActivity extends AppCompatActivity
 
     private void setDateTimeTextViews(Date date) {
         String dateString = DateFormat.getDateInstance(DateFormat.FULL).format(date);
-        String timeString = (new SimpleDateFormat("HH:mm")).format(date);
+        String timeString = (SimpleDateFormat.getTimeInstance(DateFormat.SHORT)).format(date);
         TextView dateTextView = (TextView) findViewById(R.id.date_textview);
         TextView timeTextView = (TextView) findViewById(R.id.time_textview);
         dateTextView.setText(dateString);
