@@ -11,15 +11,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ToDoListFragment extends ListFragment implements TodoListAdapter.ToDoListClickListener {
 
     public static final int REQUEST_NEW_TODO = 0;
     public static final int REQUEST_EDIT_TODO = 1;
 
+    public static final int SORT_DATE_FAV = 0;
+    public static final int SORT_FAV_DATE = 1;
+
     private TodoDbAdapter db;
 
     private ArrayList<ToDo> todoList;
+
+    private int sortMethod = 1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,11 +36,13 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         db = new TodoDbAdapter(getActivity());
-        todoList = db.getAllTodos(null);
+        todoList = new ArrayList<>();
 
         TodoListAdapter listAdapter = new TodoListAdapter(getContext(), todoList);
         listAdapter.setToDoListClickListener(this);
         setListAdapter(listAdapter);
+
+        refreshList();
 
         return inflater.inflate(R.layout.todo_list_fragment, container, false);
     }
@@ -56,14 +64,28 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         startActivityForResult(intent, REQUEST_NEW_TODO);
     }
 
-    public void startAddTodoActivityForEdit(ToDo todo) {
+    private void startAddTodoActivityForEdit(ToDo todo) {
         Intent intent = new Intent(getActivity(), EditToDoActivity.class);
         intent.putExtra(EditToDoActivity.EXTRA_TODO_PARCEL, todo);
         startActivityForResult(intent, REQUEST_EDIT_TODO);
     }
 
+    public void setSortMethod(int sortMethod) {
+        this.sortMethod = sortMethod;
+        refreshList();
+    }
+
+    private void sortTodoList() {
+        if (sortMethod == SORT_FAV_DATE)
+            Collections.sort(todoList, ToDo.FavDateComparator);
+        else
+            Collections.sort(todoList, ToDo.DateFavComparator);
+
+    }
+
     public void refreshList() {
         todoList = db.getAllTodos(todoList);
+        sortTodoList();
         ((ArrayAdapter)getListAdapter()).notifyDataSetChanged();
     }
 
@@ -97,11 +119,13 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     @Override
     public void onDoneClicked(int position) {
         db.updateTodoInDb(todoList.get(position));
+        refreshList();
     }
 
     @Override
     public void onFavClicked(int position) {
         db.updateTodoInDb(todoList.get(position));
+        refreshList();
     }
 
     @Override

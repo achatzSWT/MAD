@@ -13,6 +13,8 @@
     <string name="delete">Löschen</string>
     <string name="ok">Ok</string>
     <string name="cancel">Abbrechen</string>
+    <string name="sort_date_fav">Sort. Datum/Wichtigk.</string>
+    <string name="sort_fav_date">Sort. Wichtigk./Datum</string>
     <string name="dialog_delete_todo_title">ToDo Löschen</string>
     <string name="dialog_delete_todo_description">Sind Sie sicher, dass Sie das ToDo wirklich löschen wollen?</string>
 </resources>

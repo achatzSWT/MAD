@@ -35,6 +35,8 @@ public class TodoListAdapter extends ArrayAdapter {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.todo_list_item, null);
         }
 
+        convertView.setActivated(todo.isOverdue());
+
         ((TextView)convertView.findViewById(R.id.list_item_name_textview)).setText(todo.getName());
 
         Date date = todo.getDueDate().getTime();
