@@ -78,7 +78,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -110,6 +111,45 @@
                 android:onClick="dateTimeClicked"/>
 
         </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_people_black_24dp"
+            android:tint="@android:color/darker_gray"
+            android:layout_marginEnd="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ListView
+                android:id="@+id/contact_listview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="4dp"/>
+
+            <ImageButton
+                android:id="@+id/add_contact_imagebutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_person_add_black_24dp"
+                android:tint="@android:color/darker_gray"
+                android:background="@android:color/transparent"
+                android:onClick="onAddPeopleButtonClicked" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

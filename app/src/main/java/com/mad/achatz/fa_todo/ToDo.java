@@ -2,8 +2,8 @@ package com.mad.achatz.fa_todo;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 
@@ -16,11 +16,13 @@ public class ToDo implements Parcelable {
     private boolean isDone = false;
     private boolean isFavourite = false;
     private Calendar dueDate;
+    private ArrayList<Integer> contactIds;
 
     public ToDo(){
         dueDate = Calendar.getInstance();
         dueDate.set(Calendar.SECOND, 0);
         dueDate.set(Calendar.MILLISECOND, 0);
+        contactIds = new ArrayList<>();
     }
 
     public long getDbId() {
@@ -69,6 +71,24 @@ public class ToDo implements Parcelable {
 
     public void setDueDate(Calendar dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public ArrayList<Integer> getContactIds() {
+        return contactIds;
+    }
+
+    public void setContactIds(ArrayList<Integer> contactIds) {
+        this.contactIds = contactIds;
+    }
+
+    public void addContactId(Integer contactId) {
+        if (!contactIds.contains(contactId)) {
+            contactIds.add(contactId);
+        }
+    }
+
+    public void removeContactId(Integer contactId) {
+        contactIds.remove(contactId);
     }
 
     @Override
@@ -150,6 +170,7 @@ public class ToDo implements Parcelable {
         boolean[] boolValues = new boolean[]{isDone, isFavourite};
         dest.writeBooleanArray(boolValues);
         dest.writeSerializable(dueDate);
+        dest.writeSerializable(contactIds);
     }
 
     private static ToDo createTodoFromParcel(Parcel parcel) {
@@ -162,6 +183,7 @@ public class ToDo implements Parcelable {
         todo.setDone(boolvalues[0]);
         todo.setFavourite(boolvalues[1]);
         todo.setDueDate((Calendar)parcel.readSerializable());
+        todo.setContactIds((ArrayList<Integer>)parcel.readSerializable());
         return todo;
     }
 

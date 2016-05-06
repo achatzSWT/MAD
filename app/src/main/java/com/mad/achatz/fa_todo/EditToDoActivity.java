@@ -1,15 +1,20 @@
 package com.mad.achatz.fa_todo;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -21,12 +26,17 @@ import java.util.Date;
 public class EditToDoActivity extends AppCompatActivity
                               implements DatepickerDialogFragment.OnDateSetListener,
                                          TimepickerDialogFragment.OnTimeSetListener,
-                                         DeleteToDoDialogFragment.OnDeleteComfirmedListener {
+                                         DeleteToDoDialogFragment.OnDeleteComfirmedListener,
+                                         ContactListAdapter.ContactListClickListener {
 
     public static final String EXTRA_TODO_PARCEL = "EXTRA_TODO_PARCEL";
     public static final int RESULT_DELETE = 123;
 
+    private static final int PICK_CONTACT = 1;
+
     private ToDo todo;
+
+    private ListView contactListView;
 
     private boolean inEditMode = true;
 
@@ -51,6 +61,11 @@ public class EditToDoActivity extends AppCompatActivity
         setDateTimeTextViews(todo.getDueDate().getTime());
         ((CheckBox)findViewById(R.id.done_checkbox)).setChecked(todo.isDone());
         ((CheckBox)findViewById(R.id.favorite_checkbox)).setChecked(todo.isFavourite());
+
+        ContactListAdapter contactListAdapater = new ContactListAdapter(this, todo.getContactIds());
+        contactListAdapater.setContactListClickListener(this);
+        contactListView = (ListView) findViewById(R.id.contact_listview);
+        contactListView.setAdapter(contactListAdapater);
     }
 
     @Override
@@ -76,6 +91,29 @@ public class EditToDoActivity extends AppCompatActivity
         }
 
         return false;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_CANCELED) return;
+
+        switch (requestCode) {
+            case PICK_CONTACT:
+                Uri uri = data.getData();
+                Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    int idIndex = cursor.getColumnIndex(ContactsContract.Contacts._ID);
+                    int id = cursor.getInt(idIndex);
+                    addContactToToDo(id);
+                }
+                cursor.close();
+                break;
+        }
+    }
+
+    private void addContactToToDo(int contactId) {
+        todo.addContactId(contactId);
+        ((ArrayAdapter)contactListView.getAdapter()).notifyDataSetChanged();
     }
 
     public void dateTimeClicked(View view) {
@@ -152,6 +190,39 @@ public class EditToDoActivity extends AppCompatActivity
         deleteToDoDialogFragment.show(getFragmentManager(), null);
     }
 
+    private void setDateTimeTextViews(Date date) {
+        String dateString = DateFormat.getDateInstance(DateFormat.FULL).format(date);
+        String timeString = (SimpleDateFormat.getTimeInstance(DateFormat.SHORT)).format(date);
+        TextView dateTextView = (TextView) findViewById(R.id.date_textview);
+        TextView timeTextView = (TextView) findViewById(R.id.time_textview);
+        dateTextView.setText(dateString);
+        timeTextView.setText(timeString);
+    }
+
+    private String getNameFromTextView() {
+        EditText nameEditText = (EditText) findViewById(R.id.todo_name_edittext);
+        return nameEditText.getText().toString();
+    }
+
+    private String getDescriptionFromTextView() {
+        EditText descEditText = (EditText) findViewById(R.id.todo_description_edittext);
+        return descEditText.getText().toString();
+    }
+
+    private void returnTodo() {
+        // Andere Werte werden alle in "Echtzeit" gesetzt, aber Name und Beschreibung fehlen noch
+        todo.setName(getNameFromTextView());
+        todo.setDescription(getDescriptionFromTextView());
+
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_TODO_PARCEL, todo);
+        this.setResult(RESULT_OK, intent);
+        finish();
+    }
+
+
+    /* Dialog Interface Methods */
+
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         Calendar cal = todo.getDueDate();
@@ -167,29 +238,6 @@ public class EditToDoActivity extends AppCompatActivity
         setDateTimeTextViews(cal.getTime());
     }
 
-    private void setDateTimeTextViews(Date date) {
-        String dateString = DateFormat.getDateInstance(DateFormat.FULL).format(date);
-        String timeString = (SimpleDateFormat.getTimeInstance(DateFormat.SHORT)).format(date);
-        TextView dateTextView = (TextView) findViewById(R.id.date_textview);
-        TextView timeTextView = (TextView) findViewById(R.id.time_textview);
-        dateTextView.setText(dateString);
-        timeTextView.setText(timeString);
-    }
-
-
-    private void returnTodo() {
-        // Andere Werte werden alle in "Echtzeit" gesetzt, aber Name und Beschreibung fehlen noch
-        EditText nameEditText = (EditText) findViewById(R.id.todo_name_edittext);
-        EditText descEditText = (EditText) findViewById(R.id.todo_description_edittext);
-        todo.setName(nameEditText.getText().toString());
-        todo.setDescription(descEditText.getText().toString());
-
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_TODO_PARCEL, todo);
-        this.setResult(RESULT_OK, intent);
-        finish();
-    }
-
     @Override
     public void onDeleteConfirmed() {
         Intent intent = new Intent();
@@ -198,4 +246,38 @@ public class EditToDoActivity extends AppCompatActivity
         finish();
     }
 
+
+    /* ContactListClickListener Interface Methods */
+
+    @Override
+    public void onDeleteClicked(int position) {
+        todo.getContactIds().remove(position);
+        ((ArrayAdapter)contactListView.getAdapter()).notifyDataSetChanged();
+    }
+
+    @Override
+    public void onSmsClicked(int position, String number) {
+        Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+        smsIntent.setData(Uri.parse("sms:"));
+        smsIntent.putExtra("address", number);
+        smsIntent.putExtra("sms_body", getNameFromTextView() + "\n\n" + getDescriptionFromTextView());
+        startActivity(smsIntent);
+    }
+
+    @Override
+    public void onEmailClicked(int position, String address) {
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(Uri.parse("mailto:"));
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{address});
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, getNameFromTextView());
+        emailIntent.putExtra(Intent.EXTRA_TEXT, getDescriptionFromTextView());
+        startActivity(emailIntent);
+    }
+
+    /* Called from layout xml */
+
+    public void onAddPeopleButtonClicked(View view) {
+        Intent contactPickerIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(contactPickerIntent, PICK_CONTACT);
+    }
 }

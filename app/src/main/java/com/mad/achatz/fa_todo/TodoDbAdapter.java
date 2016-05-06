@@ -1,16 +1,17 @@
 package com.mad.achatz.fa_todo;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class TodoDbAdapter {
 
@@ -24,6 +25,7 @@ public class TodoDbAdapter {
 	private static final String COLUMN_DONE = "isdone";
 	private static final String COLUMN_FAVORITE = "isfavorite";
 	private static final String COLUMN_DUEDATE = "duedate";
+	private static final String COLUMN_CONTACTS = "contacts";
 
     private DatabaseHelper dbHelper;
     private Context context;
@@ -40,7 +42,8 @@ public class TodoDbAdapter {
     				COLUMN_DESCRIPTION + " TEXT, " +
     				COLUMN_DONE + " BOOLEAN NOT NULL, " +
     				COLUMN_FAVORITE + " BOOLEAN NOT NULL, " +
-    				COLUMN_DUEDATE + " DATETIME NOT NULL);";
+    				COLUMN_DUEDATE + " DATETIME NOT NULL, " +
+					COLUMN_CONTACTS + " TEXT);";
 
         DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -95,6 +98,7 @@ public class TodoDbAdapter {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String datetimeString = dateFormat.format(todo.getDueDate().getTime());
 		updateValues.put(COLUMN_DUEDATE, datetimeString);
+		updateValues.put(COLUMN_CONTACTS, integerListToString(todo.getContactIds()));
         int result = db.update(TABLE_TODOS, updateValues, COLUMN_ID+"="+todo.getDbId(), null);
         return (result > 0);
     }
@@ -135,6 +139,7 @@ public class TodoDbAdapter {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String datetimeString = dateFormat.format(todo.getDueDate().getTime());
 		initialValues.put(COLUMN_DUEDATE, datetimeString);
+		initialValues.put(COLUMN_CONTACTS, integerListToString(todo.getContactIds()));
         long dbId = db.insert(TABLE_TODOS, null, initialValues);
         todo.setDbId(dbId);
         return dbId;
@@ -189,6 +194,7 @@ public class TodoDbAdapter {
     		int colDone = c.getColumnIndex(COLUMN_DONE);
     		int colFav = c.getColumnIndex(COLUMN_FAVORITE);
     		int colDue = c.getColumnIndex(COLUMN_DUEDATE);
+			int colContacts = c.getColumnIndex(COLUMN_CONTACTS);
     		
     		do {
     			ToDo todo = new ToDo();
@@ -210,6 +216,8 @@ public class TodoDbAdapter {
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(date);
 				todo.setDueDate(cal);
+
+				todo.setContactIds(stringToIntegerList(c.getString(colContacts)));
 
     			todos.add(todo);
     		} while (c.moveToNext());
@@ -236,5 +244,27 @@ public class TodoDbAdapter {
     public void deleteTodo(ToDo todo) {
 		deleteTodo(todo.getDbId());
     }
-    
+
+
+	private String integerListToString(ArrayList<Integer> integerList) {
+		ArrayList<String> strings = new ArrayList<>();
+		for(int i : integerList) {
+			strings.add(Integer.toString(i));
+		}
+
+		return TextUtils.join(",", strings);
+	}
+
+	private ArrayList<Integer> stringToIntegerList(String string) {
+		String[] strings = string.split(",");
+		ArrayList<Integer> integers = new ArrayList<>();
+		for(String s : strings) {
+			try {
+				integers.add(Integer.parseInt(s));
+			} catch (NumberFormatException e) {
+				// egal
+			}
+		}
+		return integers;
+	}
 }
