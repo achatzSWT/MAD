@@ -1,10 +1,14 @@
 package com.mad.achatz.fa_todo;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +38,8 @@ public class EditToDoActivity extends AppCompatActivity
 
     private static final int PICK_CONTACT = 1;
 
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 2;
+
     private ToDo todo;
 
     private ListView contactListView;
@@ -62,10 +68,15 @@ public class EditToDoActivity extends AppCompatActivity
         ((CheckBox)findViewById(R.id.done_checkbox)).setChecked(todo.isDone());
         ((CheckBox)findViewById(R.id.favorite_checkbox)).setChecked(todo.isFavourite());
 
-        ContactListAdapter contactListAdapater = new ContactListAdapter(this, todo.getContactIds());
-        contactListAdapater.setContactListClickListener(this);
+
         contactListView = (ListView) findViewById(R.id.contact_listview);
-        contactListView.setAdapter(contactListAdapater);
+        // Erst Nutzer um Erlaubnis fragen, bevor wir Kontakte lesen, sonst kann es zu Fehler kommen.
+        if (isReadContactPermissionGranted()) {
+            setupContactListView();
+        } else {
+            requestReadContactPermission();
+        }
+
     }
 
     @Override
@@ -111,9 +122,52 @@ public class EditToDoActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_CONTACTS: {
+                // Wenn request abgebrochen wurde, ist das Array leer
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Erlaubnis wurde erteilt
+                    setupContactListView();
+                } else {
+                    // Erlaubnis wurde verweigert
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+
+    }
+
+    private boolean isReadContactPermissionGranted() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestReadContactPermission() {
+        if (! isReadContactPermissionGranted()) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
+    }
+
+    private void setupContactListView() {
+        ContactListAdapter contactListAdapater = new ContactListAdapter(this, todo.getContactIds());
+        contactListAdapater.setContactListClickListener(this);
+        contactListView.setAdapter(contactListAdapater);
+    }
+
+    private void updateContactListView() {
+        ArrayAdapter adapter = (ArrayAdapter)contactListView.getAdapter();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     private void addContactToToDo(int contactId) {
         todo.addContactId(contactId);
-        ((ArrayAdapter)contactListView.getAdapter()).notifyDataSetChanged();
+        updateContactListView();
     }
 
     public void dateTimeClicked(View view) {
@@ -252,7 +306,7 @@ public class EditToDoActivity extends AppCompatActivity
     @Override
     public void onDeleteClicked(int position) {
         todo.getContactIds().remove(position);
-        ((ArrayAdapter)contactListView.getAdapter()).notifyDataSetChanged();
+        updateContactListView();
     }
 
     @Override
