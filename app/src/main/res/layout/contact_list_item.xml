@@ -15,14 +15,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="@android:color/white"
-        android:text="asdsdg" />
+        android:layout_marginEnd="16dp"
+        android:textColor="@android:color/white" />
 
     <ImageButton
         android:id="@+id/textmessage_contact_imagebutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="16dp"
+        android:layout_marginEnd="16dp"
         android:src="@drawable/ic_textsms_black_24dp"
         android:tint="@android:color/white"
         android:background="@android:color/transparent" />
@@ -31,7 +31,7 @@
         android:id="@+id/email_contact_imagebutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="16dp"
+        android:layout_marginEnd="16dp"
         android:src="@drawable/ic_email_black_24dp"
         android:tint="@android:color/white"
         android:background="@android:color/transparent" />

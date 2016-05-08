@@ -44,31 +44,43 @@ public class ContactListAdapter extends ArrayAdapter {
         emailButton.setVisibility(View.GONE);
 
         // Arrays mit abzufragenden Spalten die wir aus der Datenbank abrufen wollen
-        String[] phoneColumns = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+        String[] contactColumns = new String[]{
+                ContactsContract.Contacts.DISPLAY_NAME
+        };
+        String[] phoneColumns = new String[]{
                 ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER,
                 ContactsContract.CommonDataKinds.Phone.NUMBER
         };
-        String[] mailColumns = new String[]{ContactsContract.CommonDataKinds.Email.ADDRESS};
+        String[] mailColumns = new String[]{
+                ContactsContract.CommonDataKinds.Email.ADDRESS
+        };
 
         // WHERE Anweisung um nur den Kontakt mit unserer ID auszuwählen.
-        String whereClause = ContactsContract.CommonDataKinds.Phone.CONTACT_ID +"=" + contactId;
+        String contactWhereClause = ContactsContract.Contacts._ID +"=" + contactId;
+        String phoneMailWhereClause = ContactsContract.CommonDataKinds.Phone.CONTACT_ID +"=" + contactId;
 
         // Cursor mit Datenbankergebnissen anlegen
-        Cursor phoneCursor = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, phoneColumns, whereClause, null, null);
-        Cursor mailCursor = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, mailColumns, whereClause, null, null);
+        Cursor contactCursor = getContext().getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, contactColumns, contactWhereClause, null, null);
+        Cursor phoneCursor = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, phoneColumns, phoneMailWhereClause, null, null);
+        Cursor mailCursor = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, mailColumns, phoneMailWhereClause, null, null);
 
-        // Checken, ob Ergebnis vorhanden ist
-        if (phoneCursor.moveToFirst()) {
-            // Indices für unserer Spalten bereitlegen
-            int nameColumnIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-            int hasNumberColumnIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER);
-            int numberColumnIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-
+        // Check ob der Kontakt einen Namen hat
+        if (contactCursor.moveToFirst()) {
+            int nameColumnIndex = contactCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
             // Name holen und in Textview eintragen
-            String name = phoneCursor.getString(nameColumnIndex);
+            String name = contactCursor.getString(nameColumnIndex);
             if (name != null) {
                 nameTextView.setText(name);
+            } else {
+                nameTextView.setText("");
             }
+        }
+
+        // Checken, ob Ergebnis für Telefonnummer vorhanden ist
+        if (phoneCursor.moveToFirst()) {
+            // Indices für unserer Spalten bereitlegen
+            int hasNumberColumnIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER);
+            int numberColumnIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
 
             // Nummer holen, String muss final sein, weil wir ihn in innerer Klasse des Onclicklistener benutzen
             final String number = phoneCursor.getString(numberColumnIndex);
