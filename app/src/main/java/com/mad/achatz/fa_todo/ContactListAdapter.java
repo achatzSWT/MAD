@@ -29,6 +29,7 @@ public class ContactListAdapter extends ArrayAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         int contactId = (Integer) getItem(position);
 
+        // Falls schon convertView existiert, nutze diesen
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.contact_list_item, null);
         }
