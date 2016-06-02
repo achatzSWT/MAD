@@ -18,6 +18,7 @@
     <string name="dialog_delete_todo_title">ToDo Löschen</string>
     <string name="dialog_delete_todo_description">Sind Sie sicher, dass Sie das ToDo wirklich löschen wollen?</string>
     <string name="title_activity_login">Login</string>
+    <string name="no_connection">Zur Zeit kann keine Verbindugn aufgebaut werden. Neuer Versuch beim nächsten Start der App.</string>
 
 
     <!-- Strings related to login -->

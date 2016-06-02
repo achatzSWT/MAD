@@ -3,28 +3,39 @@ package com.mad.achatz.fa_todo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 
-
+@JsonIgnoreProperties("location")
 public class ToDo implements Parcelable {
 
+    @JsonProperty("id")
     private long dbID;
+
     private String name;
     private String description;
-    private boolean isDone = false;
-    private boolean isFavourite = false;
+    private boolean done = false;
+    private boolean favourite = false;
+
+    @JsonProperty("expiry")
     private Calendar dueDate;
+
+    @JsonProperty("contacts")
     private ArrayList<Integer> contactIds;
 
-    public ToDo(){
+    public ToDo() {
         dueDate = Calendar.getInstance();
         dueDate.set(Calendar.SECOND, 0);
         dueDate.set(Calendar.MILLISECOND, 0);
         contactIds = new ArrayList<>();
     }
 
+    @JsonProperty("id")
     public long getDbId() {
         return dbID;
     }
@@ -50,21 +61,22 @@ public class ToDo implements Parcelable {
     }
 
     public boolean isDone() {
-        return isDone;
+        return done;
     }
 
     public void setDone(boolean done) {
-        isDone = done;
+        this.done = done;
     }
 
     public boolean isFavourite() {
-        return isFavourite;
+        return favourite;
     }
 
     public void setFavourite(boolean favourite) {
-        isFavourite = favourite;
+        this.favourite = favourite;
     }
 
+    @JsonProperty("expiry")
     public Calendar getDueDate() {
         return dueDate;
     }
@@ -73,12 +85,16 @@ public class ToDo implements Parcelable {
         this.dueDate = dueDate;
     }
 
+    @JsonProperty("contacts")
     public ArrayList<Integer> getContactIds() {
         return contactIds;
     }
 
     public void setContactIds(ArrayList<Integer> contactIds) {
-        this.contactIds = contactIds;
+        if (contactIds == null)
+            this.contactIds = new ArrayList<>();
+        else
+            this.contactIds = contactIds;
     }
 
     public void addContactId(Integer contactId) {
@@ -86,17 +102,13 @@ public class ToDo implements Parcelable {
             contactIds.add(contactId);
         }
     }
-
-    public void removeContactId(Integer contactId) {
-        contactIds.remove(contactId);
-    }
-
+    
     @Override
     public int describeContents() {
         return 0;
     }
 
-
+    @JsonIgnore
     public boolean isOverdue() {
         Calendar now = Calendar.getInstance();
         long diff = dueDate.getTimeInMillis() - now.getTimeInMillis();
@@ -108,13 +120,13 @@ public class ToDo implements Parcelable {
     public static Comparator<ToDo> FavDateComparator = new Comparator<ToDo>() {
         @Override
         public int compare(ToDo lhs, ToDo rhs) {
-            if (lhs.isDone() && ! rhs.isDone())
+            if (lhs.isDone() && !rhs.isDone())
                 return 1;
 
             if (!lhs.isDone() && rhs.isDone())
                 return -1;
 
-            if (lhs.isFavourite() && ! rhs.isFavourite())
+            if (lhs.isFavourite() && !rhs.isFavourite())
                 return -1;
 
             if (!lhs.isFavourite() && rhs.isFavourite())
@@ -129,7 +141,7 @@ public class ToDo implements Parcelable {
     public static Comparator<ToDo> DateFavComparator = new Comparator<ToDo>() {
         @Override
         public int compare(ToDo lhs, ToDo rhs) {
-            if (lhs.isDone() && ! rhs.isDone())
+            if (lhs.isDone() && !rhs.isDone())
                 return 1;
 
             if (!lhs.isDone() && rhs.isDone())
@@ -138,8 +150,8 @@ public class ToDo implements Parcelable {
             Calendar calLhs = lhs.getDueDate();
             Calendar calRhs = rhs.getDueDate();
 
-            long lhsTime = calLhs.get(Calendar.YEAR)*365 + calLhs.get(Calendar.DAY_OF_YEAR);
-            long rhsTime = calRhs.get(Calendar.YEAR)*365 + calRhs.get(Calendar.DAY_OF_YEAR);
+            long lhsTime = calLhs.get(Calendar.YEAR) * 365 + calLhs.get(Calendar.DAY_OF_YEAR);
+            long rhsTime = calRhs.get(Calendar.YEAR) * 365 + calRhs.get(Calendar.DAY_OF_YEAR);
 
             if (lhsTime < rhsTime) {
                 return -1;
@@ -147,7 +159,7 @@ public class ToDo implements Parcelable {
                 return 1;
             }
 
-            if (lhs.isFavourite() && ! rhs.isFavourite())
+            if (lhs.isFavourite() && !rhs.isFavourite())
                 return -1;
 
             if (!lhs.isFavourite() && rhs.isFavourite())
@@ -167,14 +179,14 @@ public class ToDo implements Parcelable {
         dest.writeLong(dbID);
         dest.writeString(name);
         dest.writeString(description);
-        boolean[] boolValues = new boolean[]{isDone, isFavourite};
+        boolean[] boolValues = new boolean[]{done, favourite};
         dest.writeBooleanArray(boolValues);
         dest.writeSerializable(dueDate);
         dest.writeSerializable(contactIds);
     }
 
     private static ToDo createTodoFromParcel(Parcel parcel) {
-        ToDo todo =  new ToDo();
+        ToDo todo = new ToDo();
         todo.setDbId(parcel.readLong());
         todo.setName(parcel.readString());
         todo.setDescription(parcel.readString());
@@ -182,19 +194,19 @@ public class ToDo implements Parcelable {
         parcel.readBooleanArray(boolvalues);
         todo.setDone(boolvalues[0]);
         todo.setFavourite(boolvalues[1]);
-        todo.setDueDate((Calendar)parcel.readSerializable());
-        todo.setContactIds((ArrayList<Integer>)parcel.readSerializable());
+        todo.setDueDate((Calendar) parcel.readSerializable());
+        todo.setContactIds((ArrayList<Integer>) parcel.readSerializable());
         return todo;
     }
 
     public static final Parcelable.Creator CREATOR =
-        new Parcelable.Creator() {
-            public ToDo createFromParcel(Parcel in) {
-                return ToDo.createTodoFromParcel(in);
-            }
+            new Parcelable.Creator() {
+                public ToDo createFromParcel(Parcel in) {
+                    return ToDo.createTodoFromParcel(in);
+                }
 
-            public ToDo[] newArray(int size) {
-                return new ToDo[size];
-            }
-        };
+                public ToDo[] newArray(int size) {
+                    return new ToDo[size];
+                }
+            };
 }

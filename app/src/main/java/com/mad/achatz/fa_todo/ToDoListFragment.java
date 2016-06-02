@@ -9,11 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-public class ToDoListFragment extends ListFragment implements TodoListAdapter.ToDoListClickListener {
+public class ToDoListFragment extends ListFragment implements TodoListAdapter.ToDoListClickListener,
+        TodoWebAccess.TodoWebAccessListener {
 
     public static final int REQUEST_NEW_TODO = 0;
     public static final int REQUEST_EDIT_TODO = 1;
@@ -23,7 +27,11 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
 
     private TodoDbAdapter db;
 
+    private TodoWebAccess webAccess;
+
     private ArrayList<ToDo> todoList;
+
+    private ProgressBar progressBar;
 
     private int sortMethod = 1;
 
@@ -38,13 +46,25 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         db = new TodoDbAdapter(getActivity());
         todoList = new ArrayList<>();
 
+        webAccess = new TodoWebAccess(this);
+
         TodoListAdapter listAdapter = new TodoListAdapter(getContext(), todoList);
         listAdapter.setToDoListClickListener(this);
         setListAdapter(listAdapter);
 
         refreshList();
 
-        return inflater.inflate(R.layout.todo_list_fragment, container, false);
+        View view = inflater.inflate(R.layout.todo_list_fragment, container, false);
+
+        progressBar = (ProgressBar) view.findViewById(R.id.progress);
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        webAccess.checkConnection(progressBar);
     }
 
     @Override
@@ -80,13 +100,38 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
             Collections.sort(todoList, ToDo.FavDateComparator);
         else
             Collections.sort(todoList, ToDo.DateFavComparator);
-
     }
 
     public void refreshList() {
         todoList = db.getAllTodos(todoList);
         sortTodoList();
-        ((ArrayAdapter)getListAdapter()).notifyDataSetChanged();
+        ((ArrayAdapter) getListAdapter()).notifyDataSetChanged();
+    }
+
+    private void synchronizeWithWeb() {
+        if (todoList.isEmpty()) {
+            webAccess.getAllItems();
+        } else {
+            webAccess.clearWebDatabase();
+            for (ToDo todo : todoList) {
+                webAccess.createTodo(todo);
+            }
+        }
+    }
+
+    private void addTodo(ToDo toDo) {
+        db.insertTodo(toDo, false);
+        webAccess.createTodo(toDo);
+    }
+
+    private void deleteTodo(ToDo toDo) {
+        db.deleteTodo(toDo);
+        webAccess.deleteTodo(toDo);
+    }
+
+    private void updateTodo(ToDo toDo) {
+        db.updateTodoInDb(toDo);
+        webAccess.updateTodo(toDo);
     }
 
     @Override
@@ -98,15 +143,15 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         ToDo todo = data.getParcelableExtra(EditToDoActivity.EXTRA_TODO_PARCEL);
         switch (requestCode) {
             case REQUEST_NEW_TODO:
-                db.insertTodo(todo);
+                addTodo(todo);
                 break;
             case REQUEST_EDIT_TODO:
                 switch (resultCode) {
                     case AppCompatActivity.RESULT_OK:
-                        db.updateTodoInDb(todo);
+                        updateTodo(todo);
                         break;
                     case EditToDoActivity.RESULT_DELETE:
-                        db.deleteTodo(todo);
+                        deleteTodo(todo);
                         break;
                 }
                 break;
@@ -118,13 +163,13 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
 
     @Override
     public void onDoneClicked(int position) {
-        db.updateTodoInDb(todoList.get(position));
+        updateTodo(todoList.get(position));
         refreshList();
     }
 
     @Override
     public void onFavClicked(int position) {
-        db.updateTodoInDb(todoList.get(position));
+        updateTodo(todoList.get(position));
         refreshList();
     }
 
@@ -132,5 +177,24 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     public void onItemClicked(int position) {
         ToDo todo = todoList.get(position);
         startAddTodoActivityForEdit(todo);
+    }
+
+
+    @Override
+    public void OnTodosRetrieved(List<ToDo> toDoList) {
+        for (ToDo todo : toDoList) {
+            db.insertTodo(todo, true);
+        }
+        refreshList();
+    }
+
+    @Override
+    public void OnNoConnectionAvailable() {
+        Toast.makeText(getContext(), R.string.no_connection, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void OnConnectionSuccess() {
+        synchronizeWithWeb();
     }
 }

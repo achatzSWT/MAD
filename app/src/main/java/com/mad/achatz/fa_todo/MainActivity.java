@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         toDoListFragment = (ToDoListFragment) getSupportFragmentManager().findFragmentById(R.id.todo_list_fragment);
+
     }
 
     @Override
