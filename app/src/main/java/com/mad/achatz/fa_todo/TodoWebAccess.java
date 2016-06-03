@@ -30,181 +30,30 @@ public class TodoWebAccess {
         this.listener = listener;
     }
 
-    public void getAllItems() {
+    public void getAllItems(ProgressBar progressBar) {
         if (noConnection) return;
-        new AsyncTask<Void, Void, List<ToDo>>() {
-            @Override
-            protected List<ToDo> doInBackground(Void... params) {
-                return getAllToDosForAsync();
-            }
-
-            @Override
-            protected void onPostExecute(List<ToDo> toDoList) {
-                if (toDoList != null) listener.OnTodosRetrieved(toDoList);
-                else notifyNoConnection();
-            }
-        }.execute();
+        new WebAccessTask("GET", null, progressBar).execute();
     }
 
     public void deleteTodo(final ToDo todo) {
         if (noConnection) return;
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return createUpdateDeleteForAsync("DELETE", todo);
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                // Result ist nur false wenn keine Verbindung aufgebaut werden kann.
-                // Es ist unabhängig, davon ob ein todo gelöscht wurde oder nicht
-                if (!result) notifyNoConnection();
-            }
-        }.execute();
+        new WebAccessTask("DELETE", todo, null).execute();
     }
 
     public void clearWebDatabase() {
         if (noConnection) return;
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                boolean result = true;
-                List<ToDo> todoList = getAllToDosForAsync();
-                if (todoList == null) return false;
-                for (ToDo t : todoList) {
-                    result = result && createUpdateDeleteForAsync("DELETE", t);
-                }
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                if (!result) notifyNoConnection();
-            }
-        }.execute();
+        new WebAccessTask("DELETEALL", null, null).execute();
     }
 
     public void createTodo(final ToDo todo) {
         if (noConnection) return;
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return createUpdateDeleteForAsync("POST", todo);
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                // Result ist nur false wenn keine Verbindung aufgebaut werden kann.
-                // Es ist unabhängig, davon ob ein todo erstellt wurde oder nicht
-                if (!result) notifyNoConnection();
-            }
-        }.execute();
+        new WebAccessTask("POST", todo, null).execute();
     }
 
 
     public void updateTodo(final ToDo todo) {
         if (noConnection) return;
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return createUpdateDeleteForAsync("PUT", todo);
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                // Result ist nur false wenn keine Verbindung aufgebaut werden kann.
-                // Es ist unabhängig, davon ob ein todo geändert wurde oder nicht
-                if (!result) notifyNoConnection();
-            }
-        }.execute();
-    }
-
-    public void checkConnection(final ProgressBar progressBar) {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                try {
-                    HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
-                    connection.setConnectTimeout(5000);
-                    connection.getInputStream();
-                    return (connection.getResponseCode() == HttpURLConnection.HTTP_OK);
-                } catch (IOException e) {
-                    return false;
-                }
-            }
-
-            @Override
-            protected void onPreExecute() {
-                progressBar.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                progressBar.setVisibility(View.GONE);
-                if (result)
-                    listener.OnConnectionSuccess();
-                else
-                    notifyNoConnection();
-            }
-        }.execute();
-    }
-
-    private ArrayList<ToDo> getAllToDosForAsync() {
-        ArrayList<ToDo> todoList = new ArrayList<>();
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
-            connection.setConnectTimeout(5000);
-            InputStream inputStream = connection.getInputStream();
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                connection.disconnect();
-                return null;
-            }
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readValue(inputStream, JsonNode.class);
-
-            for (JsonNode node : rootNode) {
-                todoList.add(mapper.treeToValue(node, ToDo.class));
-            }
-
-            connection.disconnect();
-
-        } catch (IOException e) {
-            todoList = null;
-        }
-        return todoList;
-    }
-
-    private boolean createUpdateDeleteForAsync(String method, ToDo toDo) {
-        boolean result = true;
-        try {
-            String url = URL + toDo.getDbId();
-            if (method.equals("POST"))
-                url = URL;
-
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setConnectTimeout(5000);
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestMethod(method);
-
-            if (method.equals("POST") || method.equals("PUT")) {
-                connection.setDoOutput(true);
-                OutputStream outputStream = connection.getOutputStream();
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.writeValue(outputStream, toDo);
-            }
-
-            connection.connect();
-
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                result = false;
-            }
-
-            connection.disconnect();
-
-        } catch (IOException e) {
-            result = false;
-        }
-        return result;
+        new WebAccessTask("PUT", todo, null).execute();
     }
 
     public void notifyNoConnection() {
@@ -212,10 +61,96 @@ public class TodoWebAccess {
         listener.OnNoConnectionAvailable();
     }
 
+    private class WebAccessTask extends AsyncTask<Void, Void, Boolean> {
+
+        private String method;
+
+        private ArrayList<ToDo> todoList = new ArrayList<>();
+        private ToDo todo;
+        private ProgressBar progressBar;
+
+        WebAccessTask(String method, ToDo todo, ProgressBar progressBar) {
+            this.method = method;
+            this.todo = todo;
+            this.progressBar = progressBar;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            boolean result;
+            if (method.equals("DELETEALL")) {
+                result = createUpdateDeleteForAsync("GET", null);
+                for (ToDo t : todoList) {
+                    result = result && createUpdateDeleteForAsync("DELETE", t);
+                }
+            } else {
+                result = createUpdateDeleteForAsync(method, todo);
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (progressBar != null) progressBar.setVisibility(View.GONE);
+            if (!result) notifyNoConnection();
+
+            if (method.equals("GET"))
+                listener.OnTodosRetrieved(todoList);
+        }
+
+        private boolean createUpdateDeleteForAsync(String method, ToDo todo) {
+            boolean result = true;
+            try {
+                String url = URL;
+                if (method.equals("PUT") || method.equals("DELETE"))
+                    url += todo.getDbId();
+
+                HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                connection.setConnectTimeout(5000);
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestMethod(method);
+
+                if (method.equals("POST") || method.equals("PUT")) {
+                    connection.setDoOutput(true);
+                    OutputStream outputStream = connection.getOutputStream();
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.writeValue(outputStream, todo);
+                }
+
+                InputStream inputStream = connection.getInputStream();
+
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    result = false;
+                }
+
+                if (method.equals("GET")) {
+                    todoList.clear();
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode rootNode = mapper.readValue(inputStream, JsonNode.class);
+                    for (JsonNode node : rootNode) {
+                        todoList.add(mapper.treeToValue(node, ToDo.class));
+                    }
+                }
+
+                connection.disconnect();
+
+            } catch (IOException e) {
+                result = false;
+            }
+
+            return result;
+        }
+
+    }
+
+
     public interface TodoWebAccessListener {
         void OnTodosRetrieved(List<ToDo> toDoList);
-
-        void OnConnectionSuccess();
 
         void OnNoConnectionAvailable();
     }

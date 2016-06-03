@@ -11,14 +11,14 @@
     <string name="done">Erledigt</string>
     <string name="save">Speichern</string>
     <string name="delete">Löschen</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="cancel">Abbrechen</string>
     <string name="sort_date_fav">Sort. Datum/Wichtigk.</string>
     <string name="sort_fav_date">Sort. Wichtigk./Datum</string>
     <string name="dialog_delete_todo_title">ToDo Löschen</string>
     <string name="dialog_delete_todo_description">Sind Sie sicher, dass Sie das ToDo wirklich löschen wollen?</string>
     <string name="title_activity_login">Login</string>
-    <string name="no_connection">Zur Zeit kann keine Verbindugn aufgebaut werden. Neuer Versuch beim nächsten Start der App.</string>
+    <string name="no_connection">Zur Zeit kann keine Verbindung aufgebaut werden. Neuer Versuch beim nächsten Start der App.</string>
 
 
     <!-- Strings related to login -->

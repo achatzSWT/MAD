@@ -3,6 +3,7 @@ package com.mad.achatz.fa_todo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     private ArrayList<ToDo> todoList;
 
     private ProgressBar progressBar;
+    private FloatingActionButton fabAddTodo;
 
     private int sortMethod = 1;
 
@@ -57,6 +59,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         View view = inflater.inflate(R.layout.todo_list_fragment, container, false);
 
         progressBar = (ProgressBar) view.findViewById(R.id.progress);
+        fabAddTodo = (FloatingActionButton) view.findViewById(R.id.add_todo_fab);
 
         return view;
     }
@@ -64,7 +67,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webAccess.checkConnection(progressBar);
+        synchronizeWithWeb();
     }
 
     @Override
@@ -110,7 +113,8 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
 
     private void synchronizeWithWeb() {
         if (todoList.isEmpty()) {
-            webAccess.getAllItems();
+            webAccess.getAllItems(progressBar);
+            fabAddTodo.setEnabled(false);
         } else {
             webAccess.clearWebDatabase();
             for (ToDo todo : todoList) {
@@ -186,15 +190,12 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
             db.insertTodo(todo, true);
         }
         refreshList();
+        fabAddTodo.setEnabled(true);
     }
 
     @Override
     public void OnNoConnectionAvailable() {
         Toast.makeText(getContext(), R.string.no_connection, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void OnConnectionSuccess() {
-        synchronizeWithWeb();
+        fabAddTodo.setEnabled(true);
     }
 }
