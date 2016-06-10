@@ -2,7 +2,6 @@ package com.mad.achatz.fa_todo;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +21,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
 
     public static final int REQUEST_NEW_TODO = 0;
     public static final int REQUEST_EDIT_TODO = 1;
+    public static final int REQUEST_LOGIN = 2;
 
     public static final int SORT_DATE_FAV = 0;
     public static final int SORT_FAV_DATE = 1;
@@ -38,11 +38,6 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     private int sortMethod = 1;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         db = new TodoDbAdapter(getActivity());
@@ -54,20 +49,14 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         listAdapter.setToDoListClickListener(this);
         setListAdapter(listAdapter);
 
-        refreshList();
-
         View view = inflater.inflate(R.layout.todo_list_fragment, container, false);
 
         progressBar = (ProgressBar) view.findViewById(R.id.progress);
         fabAddTodo = (FloatingActionButton) view.findViewById(R.id.add_todo_fab);
 
-        return view;
-    }
+        startLoginActivity();
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        synchronizeWithWeb();
+        return view;
     }
 
     @Override
@@ -80,6 +69,16 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     public void onStop() {
         super.onStop();
         db.close();
+    }
+
+    private void initList() {
+        refreshList();
+        synchronizeWithWeb();
+    }
+
+    public void startLoginActivity() {
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        startActivityForResult(intent, REQUEST_LOGIN);
     }
 
     public void startAddTodoActivity() {
@@ -126,16 +125,19 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     private void addTodo(ToDo toDo) {
         db.insertTodo(toDo, false);
         webAccess.createTodo(toDo);
+        refreshList();
     }
 
     private void deleteTodo(ToDo toDo) {
         db.deleteTodo(toDo);
         webAccess.deleteTodo(toDo);
+        refreshList();
     }
 
     private void updateTodo(ToDo toDo) {
         db.updateTodoInDb(toDo);
         webAccess.updateTodo(toDo);
+        refreshList();
     }
 
     @Override
@@ -144,7 +146,12 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
 
         if (db.isClosed()) db.open();
 
-        ToDo todo = data.getParcelableExtra(EditToDoActivity.EXTRA_TODO_PARCEL);
+        ToDo todo = null;
+        try {
+            todo = data.getParcelableExtra(EditToDoActivity.EXTRA_TODO_PARCEL);
+        } catch (RuntimeException e) {
+            // not all activites return a todo
+        }
         switch (requestCode) {
             case REQUEST_NEW_TODO:
                 addTodo(todo);
@@ -159,11 +166,11 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
                         break;
                 }
                 break;
+            case REQUEST_LOGIN:
+                initList();
+                break;
         }
-
-        refreshList();
     }
-
 
     @Override
     public void onDoneClicked(int position) {

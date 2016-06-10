@@ -84,12 +84,12 @@ public class TodoWebAccess {
         protected Boolean doInBackground(Void... params) {
             boolean result;
             if (method.equals("DELETEALL")) {
-                result = createUpdateDeleteForAsync("GET", null);
+                result = doAsyncConnectionTask("GET", null);
                 for (ToDo t : todoList) {
-                    result = result && createUpdateDeleteForAsync("DELETE", t);
+                    result = result && doAsyncConnectionTask("DELETE", t);
                 }
             } else {
-                result = createUpdateDeleteForAsync(method, todo);
+                result = doAsyncConnectionTask(method, todo);
             }
             return result;
         }
@@ -103,7 +103,7 @@ public class TodoWebAccess {
                 listener.OnTodosRetrieved(todoList);
         }
 
-        private boolean createUpdateDeleteForAsync(String method, ToDo todo) {
+        private boolean doAsyncConnectionTask(String method, ToDo todo) {
             boolean result = true;
             try {
                 String url = URL;
