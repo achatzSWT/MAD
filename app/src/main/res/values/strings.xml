@@ -19,18 +19,16 @@
     <string name="dialog_delete_todo_description">Sind Sie sicher, dass Sie das ToDo wirklich löschen wollen?</string>
     <string name="title_activity_login">Login</string>
     <string name="no_connection">Zur Zeit kann keine Verbindung aufgebaut werden. Neuer Versuch beim nächsten Start der App.</string>
+    <string name="connecting">Verbinde zum Server ...</string>
 
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
+    <string name="prompt_email">E-Mail</string>
+    <string name="prompt_password">Passwort</string>
+    <string name="action_sign_in">Einloggen</string>
+    <string name="action_sign_in_short">Einloggen</string>
+    <string name="error_invalid_email">Dies is keine gültige Email Adresse</string>
+    <string name="error_invalid_password">Dieses Passwort ist ungültig</string>
+    <string name="error_incorrect_password">Das Passwort ist inkorrekt</string>
+    <string name="attempt_login">Versuche Login ...</string>
 </resources>

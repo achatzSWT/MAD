@@ -1,6 +1,7 @@
 package com.mad.achatz.fa_todo;
 
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -12,7 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,41 +30,45 @@ public class TodoWebAccess {
 
     // Um festzustellen, ob eine Verbindung hergestellt werden kann.
     // Wird beim ersten fehlgeschlagenen Versuch auf true gesetzt.
-    private boolean noConnection = false;
+    public boolean connectionAvailable = false;
 
     public TodoWebAccess(TodoWebAccessListener listener) {
         this.listener = listener;
     }
 
+    public void checkConnection(ProgressDialog progressDialog) {
+        new CheckConnectionTask(progressDialog).execute();
+    }
+
     public void getAllItems(ProgressBar progressBar) {
-        if (noConnection) return;
-        new WebAccessTask("GET", null, progressBar).execute();
+        if (connectionAvailable)
+            new WebAccessTask("GET", null, progressBar).execute();
     }
 
     public void deleteTodo(final ToDo todo) {
-        if (noConnection) return;
-        new WebAccessTask("DELETE", todo, null).execute();
+        if (connectionAvailable)
+            new WebAccessTask("DELETE", todo, null).execute();
     }
 
     public void clearWebDatabase() {
-        if (noConnection) return;
-        new WebAccessTask("DELETEALL", null, null).execute();
+        if (connectionAvailable)
+            new WebAccessTask("DELETEALL", null, null).execute();
     }
 
     public void createTodo(final ToDo todo) {
-        if (noConnection) return;
-        new WebAccessTask("POST", todo, null).execute();
+        if (connectionAvailable)
+            new WebAccessTask("POST", todo, null).execute();
     }
 
 
     public void updateTodo(final ToDo todo) {
-        if (noConnection) return;
-        new WebAccessTask("PUT", todo, null).execute();
+        if (connectionAvailable)
+            new WebAccessTask("PUT", todo, null).execute();
     }
 
     public void notifyNoConnection() {
-        noConnection = true;
-        listener.OnNoConnectionAvailable();
+        connectionAvailable = false;
+        listener.OnConnectionLost();
     }
 
     private class WebAccessTask extends AsyncTask<Void, Void, Boolean> {
@@ -148,11 +158,66 @@ public class TodoWebAccess {
 
     }
 
+    private class CheckConnectionTask extends AsyncTask<Void, Void, Boolean> {
+
+        private ProgressDialog progressDialog;
+
+        public CheckConnectionTask(ProgressDialog progressDialog) {
+            this.progressDialog = progressDialog;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            if (progressDialog != null) {
+                progressDialog.show();
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            SocketAddress socketAddress;
+            try {
+                socketAddress = new InetSocketAddress(Inet4Address.getByName("10.0.2.2"), 8080);
+            } catch (UnknownHostException e) {
+                return false;
+            }
+            Socket socket = new Socket();
+            try {
+                int timeout = 3000;
+                socket.connect(socketAddress, timeout);
+                return true;
+            } catch (IOException e) {
+                return false;
+            } finally {
+                if (socket.isConnected()) {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (progressDialog != null) {
+                progressDialog.hide();
+            }
+            if (result != null) {
+                connectionAvailable = result;
+                listener.OnConnectionAvailableResult(result);
+            }
+        }
+    }
+
 
     public interface TodoWebAccessListener {
         void OnTodosRetrieved(List<ToDo> toDoList);
 
-        void OnNoConnectionAvailable();
+        void OnConnectionAvailableResult(boolean connectionAvailable);
+
+        void OnConnectionLost();
     }
 
 }

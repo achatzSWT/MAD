@@ -1,8 +1,8 @@
 package com.mad.achatz.fa_todo;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -33,7 +33,6 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     private ArrayList<ToDo> todoList;
 
     private ProgressBar progressBar;
-    private FloatingActionButton fabAddTodo;
 
     private int sortMethod = 1;
 
@@ -52,9 +51,11 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         View view = inflater.inflate(R.layout.todo_list_fragment, container, false);
 
         progressBar = (ProgressBar) view.findViewById(R.id.progress);
-        fabAddTodo = (FloatingActionButton) view.findViewById(R.id.add_todo_fab);
 
-        startLoginActivity();
+        ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setMessage(getText(R.string.connecting));
+
+        webAccess.checkConnection(progressDialog);
 
         return view;
     }
@@ -71,9 +72,10 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         db.close();
     }
 
-    private void initList() {
+    private void initList(boolean connectionAvailable) {
         refreshList();
-        synchronizeWithWeb();
+        if (connectionAvailable)
+            synchronizeWithWeb();
     }
 
     public void startLoginActivity() {
@@ -113,7 +115,6 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     private void synchronizeWithWeb() {
         if (todoList.isEmpty()) {
             webAccess.getAllItems(progressBar);
-            fabAddTodo.setEnabled(false);
         } else {
             webAccess.clearWebDatabase();
             for (ToDo todo : todoList) {
@@ -150,7 +151,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         try {
             todo = data.getParcelableExtra(EditToDoActivity.EXTRA_TODO_PARCEL);
         } catch (RuntimeException e) {
-            // not all activites return a todo
+            // Nicht alle activities geben ein todo zurück
         }
         switch (requestCode) {
             case REQUEST_NEW_TODO:
@@ -158,7 +159,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
                 break;
             case REQUEST_EDIT_TODO:
                 switch (resultCode) {
-                    case AppCompatActivity.RESULT_OK:
+                    case EditToDoActivity.RESULT_OK:
                         updateTodo(todo);
                         break;
                     case EditToDoActivity.RESULT_DELETE:
@@ -167,7 +168,16 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
                 }
                 break;
             case REQUEST_LOGIN:
-                initList();
+                switch (resultCode) {
+                    case LoginActivity.RESULT_OK:
+                        // In diesem Fall wurde der Login erfolgreich ausgeführt
+                        initList(true);
+                        break;
+                    case LoginActivity.RESULT_NO_CONNECTION:
+                        toastNoConnection();
+                        initList(false);
+                        break;
+                }
                 break;
         }
     }
@@ -190,19 +200,31 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         startAddTodoActivityForEdit(todo);
     }
 
-
     @Override
     public void OnTodosRetrieved(List<ToDo> toDoList) {
         for (ToDo todo : toDoList) {
             db.insertTodo(todo, true);
         }
         refreshList();
-        fabAddTodo.setEnabled(true);
     }
 
     @Override
-    public void OnNoConnectionAvailable() {
+    public void OnConnectionAvailableResult(boolean connectionAvailable) {
+        if (connectionAvailable) {
+            startLoginActivity();
+        } else {
+            initList(false);
+            toastNoConnection();
+        }
+    }
+
+    @Override
+    public void OnConnectionLost() {
+        toastNoConnection();
+    }
+
+    /** Zeigt eine einfache Nachricht, dass keine Verbing zum Server besteht */
+    private void toastNoConnection() {
         Toast.makeText(getContext(), R.string.no_connection, Toast.LENGTH_LONG).show();
-        fabAddTodo.setEnabled(true);
     }
 }

@@ -85,8 +85,11 @@ public class TodoListAdapter extends ArrayAdapter {
 
 
     public interface ToDoListClickListener {
+        /** Wird gerufen, wenn bei einem Listenelement der "Erledigt" Button geklickt wurde */
         void onDoneClicked(int position);
+        /** Wird gerufen, wenn bei einem Listenelement der "Wichtig" Button geklickt wurde */
         void onFavClicked(int position);
+        /** Wird gerufen, wenn auf ein Listenelement geklickt wurde */
         void onItemClicked(int position);
     }
 
