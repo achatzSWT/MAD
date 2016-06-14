@@ -3,8 +3,6 @@ package com.mad.achatz.fa_todo;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.view.View;
-import android.widget.ProgressBar;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,30 +38,31 @@ public class TodoWebAccess {
         new CheckConnectionTask(progressDialog).execute();
     }
 
-    public void getAllItems(ProgressBar progressBar) {
+    public void getAllItems(ProgressDialog progressDialog) {
         if (connectionAvailable)
-            new WebAccessTask("GET", null, progressBar).execute();
+            new WebAccessTask("GET", progressDialog).execute();
     }
 
     public void deleteTodo(final ToDo todo) {
         if (connectionAvailable)
-            new WebAccessTask("DELETE", todo, null).execute();
+            new WebAccessTask("DELETE", null).execute(todo);
     }
 
-    public void clearWebDatabase() {
+    public void replaceWebDatabase(List<ToDo> toDoList, ProgressDialog progressDialog) {
+        if (toDoList == null)
+            toDoList = new ArrayList<>();
         if (connectionAvailable)
-            new WebAccessTask("DELETEALL", null, null).execute();
+            new WebAccessTask("DELETEALL", progressDialog).execute(toDoList.toArray(new ToDo[toDoList.size()]));
     }
 
     public void createTodo(final ToDo todo) {
         if (connectionAvailable)
-            new WebAccessTask("POST", todo, null).execute();
+            new WebAccessTask("POST", null).execute(todo);
     }
-
 
     public void updateTodo(final ToDo todo) {
         if (connectionAvailable)
-            new WebAccessTask("PUT", todo, null).execute();
+            new WebAccessTask("PUT", null).execute(todo);
     }
 
     public void notifyNoConnection() {
@@ -71,43 +70,56 @@ public class TodoWebAccess {
         listener.OnConnectionLost();
     }
 
-    private class WebAccessTask extends AsyncTask<Void, Void, Boolean> {
+    private class WebAccessTask extends AsyncTask<ToDo, Void, Boolean> {
 
         private String method;
 
         private ArrayList<ToDo> todoList = new ArrayList<>();
-        private ToDo todo;
-        private ProgressBar progressBar;
+        private ProgressDialog progressDialog;
 
-        WebAccessTask(String method, ToDo todo, ProgressBar progressBar) {
+        WebAccessTask(String method, ProgressDialog progressDialog) {
             this.method = method;
-            this.todo = todo;
-            this.progressBar = progressBar;
+            this.progressDialog = progressDialog;
         }
 
         @Override
         protected void onPreExecute() {
-            if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+            if (progressDialog != null) progressDialog.show();
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            boolean result;
+        protected Boolean doInBackground(ToDo... params) {
+            boolean result = true;
             if (method.equals("DELETEALL")) {
+                // Finde alle Todos in Datenbank
                 result = doAsyncConnectionTask("GET", null);
+                // Jetzt lösche diese Todos
                 for (ToDo t : todoList) {
                     result = result && doAsyncConnectionTask("DELETE", t);
                 }
+                // Wenn params übergeben worden, dann sollen diese jetzt hinzugefügt werden.
+                for (ToDo t : params) {
+                    result = result && doAsyncConnectionTask("POST", t);
+                }
             } else {
-                result = doAsyncConnectionTask(method, todo);
+                if (params.length > 0) {
+                    for (ToDo t : params) {
+                        result = result && doAsyncConnectionTask(method, t);
+                    }
+                } else {
+                    result = doAsyncConnectionTask(method, null);
+                }
             }
             return result;
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
-            if (progressBar != null) progressBar.setVisibility(View.GONE);
-            if (!result) notifyNoConnection();
+            if (progressDialog != null) progressDialog.dismiss();
+            if (!result) {
+                notifyNoConnection();
+                return;
+            }
 
             if (method.equals("GET"))
                 listener.OnTodosRetrieved(todoList);
@@ -117,7 +129,7 @@ public class TodoWebAccess {
             boolean result = true;
             try {
                 String url = URL;
-                if (method.equals("PUT") || method.equals("DELETE"))
+                if (todo != null && (method.equals("PUT") || method.equals("DELETE")))
                     url += todo.getDbId();
 
                 HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();

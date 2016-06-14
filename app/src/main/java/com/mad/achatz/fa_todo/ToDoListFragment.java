@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
 
     private ArrayList<ToDo> todoList;
 
-    private ProgressBar progressBar;
+    private ProgressDialog progressDialog;
 
     private int sortMethod = 1;
 
@@ -50,14 +49,17 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
 
         View view = inflater.inflate(R.layout.todo_list_fragment, container, false);
 
-        progressBar = (ProgressBar) view.findViewById(R.id.progress);
-
-        ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setMessage(getText(R.string.connecting));
-
-        webAccess.checkConnection(progressDialog);
+        progressDialog = new ProgressDialog(getContext());
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        progressDialog.setMessage(getText(R.string.connecting));
+        webAccess.checkConnection(progressDialog);
     }
 
     @Override
@@ -113,13 +115,11 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     }
 
     private void synchronizeWithWeb() {
+        progressDialog.setMessage(getText(R.string.synchronize_items));
         if (todoList.isEmpty()) {
-            webAccess.getAllItems(progressBar);
+            webAccess.getAllItems(progressDialog);
         } else {
-            webAccess.clearWebDatabase();
-            for (ToDo todo : todoList) {
-                webAccess.createTodo(todo);
-            }
+            webAccess.replaceWebDatabase(todoList, progressDialog);
         }
     }
 
@@ -223,7 +223,9 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         toastNoConnection();
     }
 
-    /** Zeigt eine einfache Nachricht, dass keine Verbing zum Server besteht */
+    /**
+     * Zeigt eine einfache Nachricht, dass keine Verbing zum Server besteht
+     */
     private void toastNoConnection() {
         Toast.makeText(getContext(), R.string.no_connection, Toast.LENGTH_LONG).show();
     }

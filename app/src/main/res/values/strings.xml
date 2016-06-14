@@ -20,6 +20,7 @@
     <string name="title_activity_login">Login</string>
     <string name="no_connection">Zur Zeit kann keine Verbindung aufgebaut werden. Neuer Versuch beim nächsten Start der App.</string>
     <string name="connecting">Verbinde zum Server ...</string>
+    <string name="synchronize_items">Synchronisiere Daten vom Server ...</string>
 
 
     <!-- Strings related to login -->

@@ -13,44 +13,36 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ProgressBar style="?android:attr/progressBarStyleLarge"
-            android:id="@+id/progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone">
-        </ProgressBar>
-
         <ListView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="88dp"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:paddingBottom="88dp">
         </ListView>
 
         <TextView
             android:id="@android:id/empty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/todo_list_empty"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:text="@string/todo_list_empty"/>
 
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_todo_fab"
-        app:fabSize="normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:layout_gravity="bottom|end"
-        android:elevation="6dp"
-        app:pressedTranslationZ="12dp"
+        android:layout_margin="16dp"
         android:clickable="true"
+        android:elevation="6dp"
+        android:onClick="addToDoFabClicked"
         android:src="@drawable/ic_add_black_24dp"
         android:tint="@android:color/white"
         app:backgroundTint="@color/colorAccent"
-        android:onClick="addToDoFabClicked"/>
+        app:fabSize="normal"
+        app:pressedTranslationZ="12dp"/>
 
 </android.support.design.widget.CoordinatorLayout>

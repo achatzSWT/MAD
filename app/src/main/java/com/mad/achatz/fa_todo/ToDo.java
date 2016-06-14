@@ -102,7 +102,7 @@ public class ToDo implements Parcelable {
             contactIds.add(contactId);
         }
     }
-    
+
     @Override
     public int describeContents() {
         return 0;
