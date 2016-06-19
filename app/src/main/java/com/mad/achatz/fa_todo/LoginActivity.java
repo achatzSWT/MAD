@@ -31,18 +31,20 @@ import java.net.URL;
  */
 public class LoginActivity extends AppCompatActivity {
 
+    public static final int RESULT_NO_CONNECTION = 123;
+
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask authTask = null;
-
-    public static final int RESULT_NO_CONNECTION = 123;
 
     // UI references.
     private AutoCompleteTextView emailView;
     private EditText passwordView;
     private ProgressDialog progressDialog;
     private Button loginButton;
+
+    private boolean authentificationFail = false;
 
     /**
      * Dieser Textwatcher wird genutzt um bei jeder Eingabe zu überprüfen, ob eines der Textfelder leer ist und gegebenenfalls
@@ -59,6 +61,11 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         public void afterTextChanged(Editable s) {
+            if (authentificationFail) {
+                emailView.setError(null);
+                passwordView.setError(null);
+                authentificationFail = false;
+            }
             if (emailView.getText().toString().isEmpty() || passwordView.getText().toString().isEmpty()) {
                 loginButton.setEnabled(false);
             } else {
@@ -159,10 +166,19 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private boolean isEmailValid(String email) {
+        // ^ ... Stringanfang
+        // [^@] ... Alle Zeichen außer "@"
+        // + ... 1 oder mehrere
+        // @ ... @
+        // \w+ ... 1 oder mehrere Wort Zeichen [A-Za-z0-9_]
+        // \. ... "."
+        // [A-Za-z]+ .. 1 oder mehrere Buchstaben
+        // $ ... Stringende
         return email.matches("^[^@]+@\\w+\\.[A-Za-z]+$");
     }
 
     private boolean isPasswordValid(String password) {
+        // Genau 6 Zahlen
         return password.matches("^\\d{6}$");
     }
 
@@ -236,6 +252,7 @@ public class LoginActivity extends AppCompatActivity {
                 setResult(RESULT_OK);
                 finish();
             } else {
+                authentificationFail = true;
                 passwordView.setError(getString(R.string.error_incorrect_password));
                 passwordView.requestFocus();
             }

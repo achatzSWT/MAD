@@ -9,15 +9,17 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-    ToDoListFragment toDoListFragment;
+    private ToDoListFragment toDoListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Das verwendete Fragment ist im Layout definiert
         setContentView(R.layout.activity_main);
 
+        // hole Referenz zu Fragment für spätere Nutzung
         toDoListFragment = (ToDoListFragment) getSupportFragmentManager().findFragmentById(R.id.todo_list_fragment);
-
     }
 
     @Override
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         item.setChecked(true);
+        // Schaue anhand der Item-Id welches Item geklickt wurde
         switch (item.getItemId()) {
             case R.id.menu_sort_date_fav:
                 toDoListFragment.setSortMethod(ToDoListFragment.SORT_DATE_FAV);
@@ -43,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addToDoFabClicked(View view) {
-        ((ToDoListFragment) getSupportFragmentManager().findFragmentById(R.id.todo_list_fragment)).startAddTodoActivity();
+        // Wenn Floating Action Button geklickt wurde, starte Activity zum hinzufügen von Todos.
+        // Der AUfruf dieser Method is im Layout von ToDoListFragment definiert.
+        toDoListFragment.startAddTodoActivity();
     }
 
 }

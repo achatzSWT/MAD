@@ -109,27 +109,6 @@ public class TodoDbAdapter {
         return (result > 0);
     }
 
-    /** Update a given location with information from the database.
-     *
-     * @param location The location to be updated.
-     * @return The same location object that was given as an argument
-     */
-//    public CompassLocation updateLocationFromDb(CompassLocation location) {
-//
-//    	CompassLocation dbLocation = getLocationAtId(location.getDbId());
-//
-//    	// copy location information from database
-//    	location.setDbId(dbLocation.getDbId());
-//		location.setName(dbLocation.getName());
-//		location.setColor(dbLocation.getColor());
-//		location.setLongitude(dbLocation.getLongitude());
-//		location.setLatitude(dbLocation.getLatitude());
-//		location.setChecked(dbLocation.isChecked());
-//		location.setAsPresetLocation(dbLocation.isPresetLocation());
-//
-//		return location;
-//    }
-
     /**
      * Insert a new todo into database. Will also write acquired database id to todo.
      *
@@ -153,37 +132,6 @@ public class TodoDbAdapter {
         todo.setDbId(dbId);
         return dbId;
     }
-
-    /** Get the location at a specified id.
-     *
-     * @param id The id for which the location should be found.
-     * @return The location with the specified id, or null if nothing was found.
-     */
-//    public ToDo getTodoAtId(long id) {
-//    	Cursor c = db.query(TABLE_TODOS, null, COLUMN_ID+"="+id, null, null, null, null);
-//    	todo todo = null;
-//    	if (c.moveToFirst()) {
-//    		int colId = c.getColumnIndex(COLUMN_ID);
-//    		int colName = c.getColumnIndex(COLUMN_NAME);
-//    		int colColor = c.getColumnIndex(COLUMN_COLOR);
-//    		int colLong = c.getColumnIndex(COLUMN_LONGITUDE);
-//    		int colLat = c.getColumnIndex(COLUMN_LATITUDE);
-//    		int colCheck = c.getColumnIndex(COLUMN_CHECKED);
-//    		int colPreset = c.getColumnIndex(COLUMN_PRESET);
-//
-//			todo = new CompassLocation();
-//
-//			todo.setDbId(c.getLong(colId));
-//			todo.setName(c.getString(colName));
-//			todo.setColor(c.getInt(colColor));
-//			todo.setLongitude(c.getDouble(colLong));
-//			todo.setLatitude(c.getDouble(colLat));
-//			todo.setChecked((c.getInt(colCheck)>0) ? true : false);
-//			todo.setAsPresetLocation((c.getInt(colPreset)>0) ? true : false);
-//    	}
-//    	c.close();
-//    	return todo;
-//    }
 
     /**
      * Get all todos that are saved in database.

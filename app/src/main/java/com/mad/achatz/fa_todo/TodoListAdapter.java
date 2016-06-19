@@ -26,18 +26,25 @@ public class TodoListAdapter extends ArrayAdapter {
         this.toDoListClickListener = toDoListClickListener;
     }
 
+    // Baut einzelne Listenelemente für die jeweiligen Todos
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        ToDo todo = (ToDo) getItem(position);
+        // Hole Todo von gegebener position aus der Liste
+        final ToDo todo = (ToDo) getItem(position);
 
+        // existiert schon ein alter view, den wir verwenden können? WEnn nein, erstellen wir einen neuen.
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.todo_list_item, null);
         }
 
+        // Benutze den Activated Status um zu kennzeichnen, ob ein ToDo überfallig ist.
+        // Ein Todo wird nur "aktiviert" (= rote Färbung), wenn es überfällig UND noch nicht erledigt ist.
         convertView.setActivated(todo.isOverdue() && !todo.isDone());
 
+        // Setze Namen des Todos in entsprechenden TextView
         ((TextView)convertView.findViewById(R.id.list_item_name_textview)).setText(todo.getName());
 
+        // Konvertiere Datum des Todo zu String und setze zugehörigen TextView
         Date date = todo.getDueDate().getTime();
         String dateString = DateFormat.getDateInstance().format(date);
         dateString += ", " + (SimpleDateFormat.getTimeInstance(DateFormat.SHORT)).format(date);
@@ -53,8 +60,9 @@ public class TodoListAdapter extends ArrayAdapter {
             @Override
             public void onClick(View v) {
                 if (toDoListClickListener != null) {
-                    ToDo clickedTodo = (ToDo) getItem(position);
-                    clickedTodo.setDone(doneCheckbox.isChecked());
+                    // Wenn Done-Checkbox geklickt wurde, ändere den Wert für das zugehörige Todo auf den neuen Status
+                    todo.setDone(doneCheckbox.isChecked());
+                    // Jetzt informiere den listener, dass ein Click stattgefunden hat.
                     toDoListClickListener.onDoneClicked(position);
                 }
             }
@@ -64,8 +72,7 @@ public class TodoListAdapter extends ArrayAdapter {
             @Override
             public void onClick(View v) {
                 if (toDoListClickListener != null) {
-                    ToDo clickedTodo = (ToDo) getItem(position);
-                    clickedTodo.setFavourite(favCheckbox.isChecked());
+                    todo.setFavourite(favCheckbox.isChecked());
                     toDoListClickListener.onFavClicked(position);
                 }
             }

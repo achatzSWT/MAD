@@ -30,6 +30,6 @@
     <string name="action_sign_in_short">Einloggen</string>
     <string name="error_invalid_email">Dies is keine gültige Email Adresse</string>
     <string name="error_invalid_password">Dieses Passwort ist ungültig</string>
-    <string name="error_incorrect_password">Das Passwort ist inkorrekt</string>
+    <string name="error_incorrect_password">Benutzername oder Passwort ist inkorrekt</string>
     <string name="attempt_login">Versuche Login ...</string>
 </resources>

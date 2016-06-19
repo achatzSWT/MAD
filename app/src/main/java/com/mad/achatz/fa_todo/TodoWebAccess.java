@@ -27,7 +27,6 @@ public class TodoWebAccess {
     private TodoWebAccessListener listener;
 
     // Um festzustellen, ob eine Verbindung hergestellt werden kann.
-    // Wird beim ersten fehlgeschlagenen Versuch auf true gesetzt.
     public boolean connectionAvailable = false;
 
     public TodoWebAccess(TodoWebAccessListener listener) {
@@ -77,6 +76,11 @@ public class TodoWebAccess {
         private ArrayList<ToDo> todoList = new ArrayList<>();
         private ProgressDialog progressDialog;
 
+        /**
+         *
+         * @param method HTTP method to use
+         * @param progressDialog
+         */
         WebAccessTask(String method, ProgressDialog progressDialog) {
             this.method = method;
             this.progressDialog = progressDialog;
@@ -91,7 +95,7 @@ public class TodoWebAccess {
         protected Boolean doInBackground(ToDo... params) {
             boolean result = true;
             if (method.equals("DELETEALL")) {
-                // Finde alle Todos in Datenbank
+                // Finde alle Todos in Datenbank vom Webserver
                 result = doAsyncConnectionTask("GET", null);
                 // Jetzt lösche diese Todos
                 for (ToDo t : todoList) {
@@ -178,6 +182,7 @@ public class TodoWebAccess {
             this.progressDialog = progressDialog;
         }
 
+        // Läuft noch auf GUI Thread
         @Override
         protected void onPreExecute() {
             if (progressDialog != null) {
@@ -185,6 +190,7 @@ public class TodoWebAccess {
             }
         }
 
+        // Läuft auf seperatem Thread
         @Override
         protected Boolean doInBackground(Void... params) {
             SocketAddress socketAddress;
@@ -211,6 +217,7 @@ public class TodoWebAccess {
             }
         }
 
+        // Läuft wieder auf GUI Thread
         @Override
         protected void onPostExecute(Boolean result) {
             if (progressDialog != null) {
@@ -218,6 +225,7 @@ public class TodoWebAccess {
             }
             if (result != null) {
                 connectionAvailable = result;
+                // Sende Ergebnis an Listener
                 listener.OnConnectionAvailableResult(result);
             }
         }

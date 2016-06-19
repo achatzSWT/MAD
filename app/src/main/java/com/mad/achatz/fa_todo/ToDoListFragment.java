@@ -109,8 +109,11 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     }
 
     public void refreshList() {
-        todoList = db.getAllTodos(todoList);
+        // Hole ToDos aus Datenbanke
+        db.getAllTodos(todoList);
+        // Sortiere todos
         sortTodoList();
+        // Sage Listenadapter, dass sich Daten geändert haben.
         ((ArrayAdapter) getListAdapter()).notifyDataSetChanged();
     }
 
@@ -182,6 +185,9 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         }
     }
 
+
+    // Methoden für Implementation des TodoListAdapter.ToDoListClickListener Interface
+
     @Override
     public void onDoneClicked(int position) {
         updateTodo(todoList.get(position));
@@ -199,6 +205,9 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
         ToDo todo = todoList.get(position);
         startAddTodoActivityForEdit(todo);
     }
+
+
+    // Methoden für Implementation des TodoWebAccess.TodoWebAccessListener Interface
 
     @Override
     public void OnTodosRetrieved(List<ToDo> toDoList) {
