@@ -38,7 +38,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        db = new TodoDbAdapter(getActivity());
+        db = new TodoDbAdapter(getContext());
         todoList = new ArrayList<>();
 
         webAccess = new TodoWebAccess(this);
@@ -109,7 +109,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     }
 
     public void refreshList() {
-        // Hole ToDos aus Datenbanke
+        // Hole ToDos aus Datenbank
         db.getAllTodos(todoList);
         // Sortiere todos
         sortTodoList();
@@ -127,7 +127,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     }
 
     private void addTodo(ToDo toDo) {
-        db.insertTodo(toDo, false);
+        db.insertTodo(toDo);
         webAccess.createTodo(toDo);
         refreshList();
     }
@@ -212,7 +212,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     @Override
     public void OnTodosRetrieved(List<ToDo> toDoList) {
         for (ToDo todo : toDoList) {
-            db.insertTodo(todo, true);
+            db.insertTodo(todo);
         }
         refreshList();
     }

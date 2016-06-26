@@ -12,7 +12,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -39,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     private UserLoginTask authTask = null;
 
     // UI references.
-    private AutoCompleteTextView emailView;
+    private EditText emailView;
     private EditText passwordView;
     private ProgressDialog progressDialog;
     private Button loginButton;
@@ -89,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        emailView = (AutoCompleteTextView) findViewById(R.id.email);
+        emailView = (EditText) findViewById(R.id.email);
         emailView.addTextChangedListener(emptyTextViewWatcher);
 
         passwordView = (EditText) findViewById(R.id.password);
@@ -184,8 +183,8 @@ public class LoginActivity extends AppCompatActivity {
 
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String email;
-        private final String password;
+        private String email;
+        private String password;
 
         private final static String URL = "http://10.0.2.2:8080/api/users/auth/";
 

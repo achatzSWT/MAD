@@ -30,9 +30,6 @@ public class TodoDbAdapter {
     private DatabaseHelper dbHelper;
     private Context context;
 
-    /**
-     * Handle to the database
-     */
     private SQLiteDatabase db;
 
     private class DatabaseHelper extends SQLiteOpenHelper {
@@ -74,26 +71,19 @@ public class TodoDbAdapter {
         db = dbHelper.getWritableDatabase();
     }
 
-    /**
-     * Close database connection.
-     */
     public void close() {
         db.close();
         dbHelper.close();
     }
 
-    /**
-     * Check whether Database has been closed.
-     */
     public boolean isClosed() {
         return !db.isOpen();
     }
 
     /**
-     * Update a todo in the database.
+     * Aktualisiere ein ToDo in der Datenbank
      *
-     * @param todo The todo to be updated.
-     * @return True if update was successful, False otherwise (like when todo doesn't exist)
+     * @return True wenn erfolgreich, ansonsten false
      */
     public boolean updateTodoInDb(ToDo todo) {
         ContentValues updateValues = new ContentValues();
@@ -110,16 +100,13 @@ public class TodoDbAdapter {
     }
 
     /**
-     * Insert a new todo into database. Will also write acquired database id to todo.
+     * Füge Todo in Datenbank ein und schreibe die von der Datenbank vergebene Id in das Todo.
      *
-     * @param todo  The todo to be added.
-     * @param useId Whether to also use the Todo's id for insertion
-     * @return database id of newly inserted todo or -1 on error.
+     * @param todo  Das Todo
+     * @return Datenbank ID des eingefügten Todo oder -1 bei Fehler.
      */
-    public long insertTodo(ToDo todo, boolean useId) {
+    public long insertTodo(ToDo todo) {
         ContentValues initialValues = new ContentValues();
-        // INFO: inserting stuff this way doesn't seem to require escaping of characters, apparently the methods do that for us
-        if (useId) initialValues.put(COLUMN_ID, todo.getDbId());
         initialValues.put(COLUMN_NAME, todo.getName());
         initialValues.put(COLUMN_DESCRIPTION, todo.getDescription());
         initialValues.put(COLUMN_DONE, todo.isDone());
@@ -134,10 +121,10 @@ public class TodoDbAdapter {
     }
 
     /**
-     * Get all todos that are saved in database.
+     * Hole alle Todos aus der Datenbank.
      *
-     * @param todos ArrayList into which to save the todos. The Array will be cleared before entering new todos.
-     * @return The same ArrayList object that was entered, or a new one in case the argument was null.
+     * @param todos ArrayList in welche die Todos geschrieben werden sollen. Wird vorher geleert.
+     * @return Die übergebene Arraylist.
      */
     public ArrayList<ToDo> getAllTodos(ArrayList<ToDo> todos) {
         Cursor c = db.query(TABLE_TODOS, null, null, null, null, null, COLUMN_NAME);
@@ -186,25 +173,12 @@ public class TodoDbAdapter {
         return todos;
     }
 
-
     /**
-     * Delete a Todo with the specified id from database.
-     *
-     * @param id The id of the Todo to be deleted.
-     */
-    public void deleteTodo(long id) {
-        db.delete(TABLE_TODOS, COLUMN_ID + "=" + id, null);
-    }
-
-    /**
-     * Delete a todo from database.
-     *
-     * @param todo The id of the todo to be deleted.
+     * Lösche Todo aus Datenbank
      */
     public void deleteTodo(ToDo todo) {
-        deleteTodo(todo.getDbId());
+        db.delete(TABLE_TODOS, COLUMN_ID + "=" + todo.getDbId(), null);
     }
-
 
     private String integerListToString(ArrayList<Integer> integerList) {
         if (integerList == null)
@@ -226,7 +200,6 @@ public class TodoDbAdapter {
             try {
                 integers.add(Integer.parseInt(s));
             } catch (NumberFormatException e) {
-                // egal
             }
         }
         return integers;
