@@ -127,7 +127,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     }
 
     private void addTodo(ToDo toDo) {
-        db.insertTodo(toDo);
+        db.insertTodo(toDo, false);
         webAccess.createTodo(toDo);
         refreshList();
     }
@@ -212,7 +212,7 @@ public class ToDoListFragment extends ListFragment implements TodoListAdapter.To
     @Override
     public void OnTodosRetrieved(List<ToDo> toDoList) {
         for (ToDo todo : toDoList) {
-            db.insertTodo(todo);
+            db.insertTodo(todo, true);
         }
         refreshList();
     }

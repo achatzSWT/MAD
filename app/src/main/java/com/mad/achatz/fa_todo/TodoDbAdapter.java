@@ -103,10 +103,12 @@ public class TodoDbAdapter {
      * Füge Todo in Datenbank ein und schreibe die von der Datenbank vergebene Id in das Todo.
      *
      * @param todo  Das Todo
+     * @param useId Ob id mit übernommen werden soll
      * @return Datenbank ID des eingefügten Todo oder -1 bei Fehler.
      */
-    public long insertTodo(ToDo todo) {
+    public long insertTodo(ToDo todo, boolean useId) {
         ContentValues initialValues = new ContentValues();
+        if (useId) initialValues.put(COLUMN_ID, todo.getDbId());
         initialValues.put(COLUMN_NAME, todo.getName());
         initialValues.put(COLUMN_DESCRIPTION, todo.getDescription());
         initialValues.put(COLUMN_DONE, todo.isDone());
